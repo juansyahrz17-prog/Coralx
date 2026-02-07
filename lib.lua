@@ -1452,3 +1452,4 @@ function CoralX:Window(config)
     end
     return Window
 end
+return CoralX
