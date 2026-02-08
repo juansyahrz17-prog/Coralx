@@ -10,6 +10,8 @@ Terrain = workspace:FindFirstChildOfClass("Terrain")
 local VoraLib = {}
 local Connections = {}
 
+-- DataCache and Config System removed per user request
+
 
 
 
@@ -516,7 +518,7 @@ function VoraLib:CreateWindow(options)
 		Instance = ScreenGui
 	}
 
-    Window.Elements = {}
+
 
 	
 	local NotificationHolder = Create("Frame", {
@@ -868,62 +870,7 @@ function VoraLib:CreateWindow(options)
 		end
 	end)
 	
-	function Window:LoadConfig(configName)
-		if not configName or configName == "" then
-			Window:Notify({ Title = "Error", Content = "No config selected!", Duration = 3 })
-			return
-		end
-		
-		local success = loadConfigByName(configName)
-		if not success then
-			Window:Notify({ Title = "Error", Content = "Failed to load config!", Duration = 3 })
-			return
-		end
-		
-		-- Update all registered elements with proper type handling
-		for key, element in pairs(Window.Elements) do
-			if ConfigData[key] ~= nil then
-				pcall(function()
-					local value = ConfigData[key]
-					local elementType = element.Type
-					
-					-- Type-specific handling
-					if elementType == "Toggle" then
-						-- Ensure boolean
-						if type(value) == "boolean" then
-							element.Object:Set(value)
-						end
-					elseif elementType == "Input" then
-						-- Ensure string
-						element.Object:Set(tostring(value))
-					elseif elementType == "Slider" then
-						-- Ensure number
-						local numValue = tonumber(value)
-						if numValue then
-							element.Object:Set(numValue)
-						end
-					elseif elementType == "Dropdown" then
-						-- Ensure string
-						element.Object:Set(tostring(value))
-					elseif elementType == "MultiDropdown" then
-						-- Ensure table
-						if type(value) == "table" then
-							element.Object:Set(value)
-						end
-					else
-						-- Fallback for unknown types
-						element.Object:Set(value)
-					end
-				end)
-			end
-		end
-		
-		Window:Notify({
-			Title = "Success",
-			Content = "Config '" .. configName .. "' loaded successfully!",
-			Duration = 4
-		})
-	end
+
 
 	function Window:CreateTab(options)
 		options = options or {}
@@ -1538,12 +1485,7 @@ function VoraLib:CreateWindow(options)
             local Default = options.Default or options.Value or false
             local Values = options.Values or {}
             local Callback = options.Callback or function() end
-            local ConfigKey = options.ConfigKey or ToggleName
-            
-            -- Load saved value if exists
-            if ConfigData[ConfigKey] ~= nil then
-                Default = ConfigData[ConfigKey]
-            end
+
             
             local Toggled = Default
             
@@ -1645,8 +1587,7 @@ function VoraLib:CreateWindow(options)
                 TweenService:Create(SwitchCircle, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = TargetPos}):Play()
                 
                 -- Save to config
-                ConfigData[ConfigKey] = Toggled
-                saveConfig()
+
                 
                 if #Values > 0 then
                     Callback(Values[Toggled and 2 or 1]) 
@@ -1671,13 +1612,7 @@ function VoraLib:CreateWindow(options)
                 UpdateToggleState(true)
             end
             
-            -- Register Element
-            if ConfigKey then
-                Window.Elements[ConfigKey] = {
-                    Object = ToggleObject,
-                    Type = "Toggle"
-                }
-            end
+
 
             return ToggleObject
         end
@@ -1691,12 +1626,7 @@ function VoraLib:CreateWindow(options)
 			-- Support both 'Default' and 'Value' for backward compatibility
 			local Default = options.Default or options.Value or Min
 			local Callback = options.Callback or function() end
-			local ConfigKey = options.ConfigKey or SliderName
-			
-			-- Load saved value if exists
-			if ConfigData[ConfigKey] ~= nil then
-				Default = math.clamp(tonumber(ConfigData[ConfigKey]) or Default, Min, Max)
-			end
+
 			
 			local SliderFrame = Create("Frame", {
 				Name = "SliderFrame",
@@ -1804,11 +1734,7 @@ function VoraLib:CreateWindow(options)
 				TweenService:Create(SliderKnob, TweenInfo.new(0.05), {Position = UDim2.new(Percent, 0, 0.5, 0)}):Play()
 				ValueLabel.Text = tostring(Value)
 				
-				-- Save to config
-				if ConfigKey then
-					ConfigData[ConfigKey] = Value
-					saveConfig()
-				end
+
 				
 				Callback(Value)
 			end
@@ -1850,22 +1776,12 @@ function VoraLib:CreateWindow(options)
 				ValueLabel.Text = tostring(value)
 				self.Value = value
 				
-				-- Save to config
-				if ConfigKey then
-					ConfigData[ConfigKey] = value
-					saveConfig()
-				end
+
 				
 				Callback(value)
 			end
 			
-			-- Register Element
-			if ConfigKey then
-				Window.Elements[ConfigKey] = {
-					Object = SliderObject,
-					Type = "Slider"
-				}
-			end
+
 			
 			return SliderObject
 		end
@@ -1880,15 +1796,7 @@ function VoraLib:CreateWindow(options)
             local SideLabel = options.SideLabel
             local Value = options.Value or Default
             local Values = options.Values or {}
-            local ConfigKey = options.ConfigKey
-            if ConfigKey == nil and InputName ~= "Config Name" then
-                ConfigKey = InputName
-            end
-            
-            -- Load saved value if exists
-            if ConfigData[ConfigKey] ~= nil then
-                Value = ConfigData[ConfigKey]
-            end
+
             
             local InputFrame = Create("Frame", {
                 Name = "InputFrame",
@@ -1984,11 +1892,7 @@ function VoraLib:CreateWindow(options)
                 local newValue = TextBox.Text
                 InputObject.Value = newValue
                 
-                -- Save to config
-                if ConfigKey then
-                    ConfigData[ConfigKey] = newValue
-                    saveConfig()
-                end
+
                 
                 Callback(newValue)
             end)
@@ -2002,11 +1906,7 @@ function VoraLib:CreateWindow(options)
                 self.Value = value
                 TextBox.Text = tostring(value)
                 
-                -- Save to config
-                if ConfigKey then
-                    ConfigData[ConfigKey] = tostring(value)
-                    saveConfig()
-                end
+
                 
                 Callback(tostring(value))
             end
@@ -2019,13 +1919,7 @@ function VoraLib:CreateWindow(options)
                 Callback(Value or Default)
             end
             
-            -- Register Element
-            if ConfigKey then
-                Window.Elements[ConfigKey] = {
-                    Object = InputObject,
-                    Type = "Input"
-                }
-            end
+
 
             return InputObject
         end
@@ -2036,13 +1930,7 @@ function VoraLib:CreateWindow(options)
             local Items = options.Items or {}
             local Callback = options.Callback or function() end
             local Default = options.Default
-            local ConfigKey = options.ConfigKey or DropdownName
-            
-            -- Load saved config
-            local SavedValue = ConfigData[ConfigKey]
-            if SavedValue ~= nil then
-                 Default = SavedValue
-            end
+
             
             -- Fallback defaults
             if not Default then
@@ -2245,10 +2133,7 @@ function VoraLib:CreateWindow(options)
                 self.Value = value
                 ValueLabel.Text = tostring(value)
                 
-                if ConfigKey then
-                    ConfigData[ConfigKey] = tostring(value)
-                    saveConfig()
-                end
+
                 Callback(value)
             end
             
@@ -2261,13 +2146,7 @@ function VoraLib:CreateWindow(options)
                  Populate("")
             end
 
-            -- Register Element
-            if ConfigKey then
-                Window.Elements[ConfigKey] = {
-                    Object = DropdownObject,
-                    Type = "Dropdown"
-                }
-            end
+
 
             return DropdownObject
         end
@@ -2280,11 +2159,7 @@ function VoraLib:CreateWindow(options)
             local Items = options.Items or options.Values or {}
             local Default = options.Default or options.Value or {}
             local Callback = options.Callback or function() end
-            local ConfigKey = options.ConfigKey or DropdownName
-            
-            if ConfigData[ConfigKey] ~= nil and type(ConfigData[ConfigKey]) == "table" then
-                Default = ConfigData[ConfigKey]
-            end
+
             
             -- Ensure Default is table
             if type(Default) ~= "table" then Default = {} end
@@ -2473,7 +2348,7 @@ function VoraLib:CreateWindow(options)
                              end
                              
                              MultiDropdownObject:UpdateLabel()
-                             if ConfigKey then ConfigData[ConfigKey] = Selected; saveConfig() end
+
                              Callback(Selected)
                          end)
                     end
@@ -2511,10 +2386,7 @@ function VoraLib:CreateWindow(options)
                 Selected = values
                 MultiDropdownObject:UpdateLabel()
                 
-                if ConfigKey then
-                    ConfigData[ConfigKey] = Selected
-                    saveConfig()
-                end
+
                 Callback(Selected)
                 Populate(SearchBox.Text)
             end
@@ -2530,13 +2402,7 @@ function VoraLib:CreateWindow(options)
                 MultiDropdownObject:Set(Selected)
             end
 
-            -- Register Element
-            if ConfigKey then
-                Window.Elements[ConfigKey] = {
-                    Object = MultiDropdownObject,
-                    Type = "MultiDropdown"
-                }
-            end
+
 
             return MultiDropdownObject
       end
@@ -2887,7 +2753,6 @@ function VoraLib:CreateWindow(options)
 
 	return Window
 end
-
 
 function VoraLib:Destroy()
 	for _, connection in pairs(Connections) do
