@@ -1,3 +1,10 @@
+--[[
+    Vorahub | COMMUNITY
+    Author  : Andra/Garz
+    Version : 1.0.2
+    Created : November 2025
+    Discord : discord.gg/vorahub
+]]
 TweenService = game:GetService("TweenService")
 UserInputService = game:GetService("UserInputService")
 RunService = game:GetService("RunService")
@@ -9,10 +16,6 @@ Terrain = workspace:FindFirstChildOfClass("Terrain")
     
 local VoraLib = {}
 local Connections = {}
-
--- DataCache and Config System removed per user request
-
-
 
 
 function MakeDraggable(topbarobject, object)
@@ -114,6 +117,9 @@ local Icons = {
     fish      = "rbxassetid://97167558235554",
 }
 
+
+
+VoraLib.Icons = Icons
 
 function VoraLib:CreateWindow(options)
     
@@ -875,7 +881,7 @@ function VoraLib:CreateWindow(options)
 	function Window:CreateTab(options)
 		options = options or {}
 		local TabName = options.Name or "Tab"
-		local TabIcon = options.Icon or ""
+		local TabIcon = Icons[options.Icon] or options.Icon or ""
 		
 		local Tab = {
 			Active = false,
