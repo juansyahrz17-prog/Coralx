@@ -1,5 +1,5 @@
 --[[
-    Vorahub | COMMUNITY
+    Vorahub | Community
     Author  : Andra/Garz
     Version : 1.0.2
     Created : November 2025
@@ -452,7 +452,7 @@ function VoraLib:CreateWindow(options)
 		Size = UDim2.new(0, 50, 0, 50),
 		Image = "rbxassetid://127876061340518", 
 		ImageColor3 = Theme.TextColor,
-		Visible = false, 
+		Visible = true, 
 		Active = true,
 		Draggable = true,
 		ZIndex = 100
@@ -490,6 +490,15 @@ function VoraLib:CreateWindow(options)
 	end
 	
 	ToggleButton.MouseButton1Click:Connect(ToggleUI)
+	
+	-- Add keyboard shortcut
+	local ToggleKey = Enum.KeyCode.RightControl
+	table.insert(Connections, UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if not gameProcessed and input.KeyCode == ToggleKey then
+			ToggleUI()
+		end
+	end))
+
 
 	local function CreateControlButton(name, icon, layoutOrder, callback)
 		local Button = Create("ImageButton", {
@@ -701,34 +710,7 @@ function VoraLib:CreateWindow(options)
 		end
 	end
 
-	local ToggleButton = Create("ImageButton", {
-		Name = "ToggleUI",
-		Parent = ScreenGui,
-		BackgroundColor3 = Theme.Background,
-		BorderSizePixel = 0,
-		Position = UDim2.new(0.1, 0, 0.1, 0),
-		Size = UDim2.new(0, 50, 0, 50),
-		Image = "rbxassetid://127876061340518", 
-		ImageColor3 = Theme.TextColor,
-		Visible = true, 
-		Active = true,
-		Draggable = true,
-		ZIndex = 100
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 10),
-		Parent = ToggleButton
-	})
-	
-	ToggleButton.MouseButton1Click:Connect(ToggleUI)
 
-	local ToggleKey = Enum.KeyCode.RightControl
-	table.insert(Connections, UserInputService.InputBegan:Connect(function(input, gameProcessed)
-		if not gameProcessed and input.KeyCode == ToggleKey then
-			ToggleUI()
-		end
-	end))
 
 	
 	local TabContainer = Create("ScrollingFrame", {
