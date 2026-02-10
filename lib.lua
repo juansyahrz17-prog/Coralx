@@ -1,7 +1,7 @@
 --[[
     Vorahub | COMMUNITY
     Author  : Andra/Garz
-    Version : 1.0.3
+    Version : 1.0.2
     Created : November 2025
     Discord : discord.gg/vorahub
 ]]
@@ -109,12 +109,13 @@ local Icons = {
     question  = "rbxassetid://17510196486",
     idea      = "rbxassetid://16833255748",
     strom     = "rbxassetid://13321880293",
-    water     = "rbxassetid://100076212630732",
+    water     = "rbxassetid://13321880293",
     dcs       = "rbxassetid://15310731934",
     start     = "rbxassetid://108886429866687",
     next      = "rbxassetid://12662718374",
     rod       = "rbxassetid://103247953194129",
     fish      = "rbxassetid://97167558235554",
+    bell      = "rbxassetid://73186275216515",
 }
 
 
@@ -553,10 +554,11 @@ function VoraLib:CreateWindow(options)
 
 	function Window:Notify(options)
 		options = options or {}
-		local Title = options.Title or "Notification"
+		local Title = options.Title or options.Name or "Notification"
 		local Content = options.Content or "Message"
 		local Duration = options.Duration or 3
-		local Image = options.Image or "rbxassetid://112067161065104"
+		local Image = options.Image or options.Icon or "rbxassetid://112067161065104"
+		if Icons[Image] then Image = Icons[Image] end
 
 		local NotifyFrame = Create("Frame", {
 			Name = "NotifyFrame",
