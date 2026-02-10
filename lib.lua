@@ -1,7 +1,7 @@
 --[[
-    Vorahub | Community
+    Vorahub | COMMUNITY
     Author  : Andra/Garz
-    Version : 1.0.2
+    Version : 1.0.3
     Created : November 2025
     Discord : discord.gg/vorahub
 ]]
@@ -475,11 +475,9 @@ function VoraLib:CreateWindow(options)
 		if IsMinimized then
 			MainFrame.Visible = false
 			Shadow.Visible = false
-			ToggleButton.Visible = true
 		else
 			MainFrame.Visible = true
 			Shadow.Visible = true
-			ToggleButton.Visible = false
 
 			local OriginalSize = IsMobile and UDim2.new(0, 500, 0, 320) or UDim2.new(0, 700, 0, 450)
 			MainFrame.Size = UDim2.new(0, 0, 0, 0)
