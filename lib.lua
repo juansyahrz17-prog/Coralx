@@ -165,7 +165,7 @@ function VoraLib:CreateWindow(options)
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4), 
+		CornerRadius = UDim.new(0, 10), 
 		Parent = MainFrame
 	})
 	
@@ -326,7 +326,7 @@ function VoraLib:CreateWindow(options)
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
+		CornerRadius = UDim.new(0, 10),
 		Parent = Header
 	})
 	
@@ -453,7 +453,7 @@ function VoraLib:CreateWindow(options)
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
+		CornerRadius = UDim.new(0, 10),
 		Parent = ToggleButton
 	})
 	
@@ -575,7 +575,7 @@ function VoraLib:CreateWindow(options)
 			ClipsDescendants = true
 		})
 
-		Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = NotifyFrame })
+		Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = NotifyFrame })
 		Create("UIStroke", { Color = Theme.Outline, Thickness = 1, Parent = NotifyFrame })
 
 		local ContentFrame = Create("Frame", {
@@ -593,7 +593,7 @@ function VoraLib:CreateWindow(options)
 			ImageColor3 = Theme.Accent
 		})
 		
-		Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = Icon })
+		Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = Icon })
 
 		local TitleLabel = Create("TextLabel", {
 			Parent = ContentFrame,
@@ -817,7 +817,7 @@ function VoraLib:CreateWindow(options)
 		ZIndex = 2005
 	})
 	
-	Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = DropdownSelect })
+	Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = DropdownSelect })
 	Create("UIStroke", { Color = Theme.Accent, Thickness = 1, Transparency = 0.5, Parent = DropdownSelect })
 	
 	-- Dropdown Shadow
@@ -888,7 +888,7 @@ function VoraLib:CreateWindow(options)
 		})
 		
 		Create("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 6),
 			Parent = TabButton
 		})
 		
@@ -1092,7 +1092,7 @@ function VoraLib:CreateWindow(options)
 				Text = ""
 			})
 			
-			Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = SectionHeader })
+			Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = SectionHeader })
 			
             -- Header Gradient/Stroke (Optional beautification)
 			local HeaderStroke = Create("UIStroke", {
@@ -1254,7 +1254,7 @@ function VoraLib:CreateWindow(options)
             })
             
             Create("UICorner", {
-                CornerRadius = UDim.new(0, 4),
+                CornerRadius = UDim.new(0, 6),
                 Parent = ParagraphFrame
             })
             
@@ -1369,7 +1369,7 @@ function VoraLib:CreateWindow(options)
 			})
 			
 			Create("UICorner", {
-				CornerRadius = UDim.new(0, 4),
+				CornerRadius = UDim.new(0, 6),
 				Parent = ButtonFrame
 			})
 			
@@ -1499,7 +1499,7 @@ function VoraLib:CreateWindow(options)
             })
             
             Create("UICorner", {
-                CornerRadius = UDim.new(0, 4),
+                CornerRadius = UDim.new(0, 6),
                 Parent = ToggleFrame
             })
             
