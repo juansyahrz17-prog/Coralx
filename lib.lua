@@ -109,7 +109,7 @@ local Icons = {
     question  = "rbxassetid://17510196486",
     idea      = "rbxassetid://16833255748",
     strom     = "rbxassetid://13321880293",
-    water     = "rbxassetid://13492318055",
+    water     = "rbxassetid://13321880293",
     dcs       = "rbxassetid://15310731934",
     start     = "rbxassetid://108886429866687",
     next      = "rbxassetid://12662718374",
@@ -165,7 +165,7 @@ function VoraLib:CreateWindow(options)
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, 10), 
+		CornerRadius = UDim.new(0, 4), 
 		Parent = MainFrame
 	})
 	
@@ -173,15 +173,8 @@ function VoraLib:CreateWindow(options)
 	local MainStroke = Create("UIStroke", {
 		Transparency = 0,
 		Thickness = 1,
+		Color = Theme.Outline,
 		Parent = MainFrame
-	})
-	
-	Create("UIGradient", {
-		Parent = MainStroke,
-		Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 190, 255)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 18, 32))
-		},
 	})
 
 	-- Background Pattern (Hexagons/Dots)
@@ -333,7 +326,7 @@ function VoraLib:CreateWindow(options)
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, 10),
+		CornerRadius = UDim.new(0, 4),
 		Parent = Header
 	})
 	
@@ -460,7 +453,7 @@ function VoraLib:CreateWindow(options)
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, 10),
+		CornerRadius = UDim.new(0, 4),
 		Parent = ToggleButton
 	})
 	
@@ -474,14 +467,26 @@ function VoraLib:CreateWindow(options)
 		IsMinimized = not IsMinimized
 		
 		if IsMinimized then
-			MainFrame.Visible = false
-			Shadow.Visible = false
+			-- Close Animation
+			local CloseTween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+				Size = UDim2.new(0, 0, 0, 0)
+			})
+			CloseTween:Play()
+			
+			task.delay(0.3, function()
+				if IsMinimized then
+					MainFrame.Visible = false
+					if Shadow then Shadow.Visible = false end
+				end
+			end)
 		else
+			-- Open Animation
 			MainFrame.Visible = true
-			Shadow.Visible = true
+			if Shadow then Shadow.Visible = true end
 
 			local OriginalSize = IsMobile and UDim2.new(0, 500, 0, 320) or UDim2.new(0, 700, 0, 450)
 			MainFrame.Size = UDim2.new(0, 0, 0, 0)
+			
 			TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 				Size = OriginalSize
 			}):Play()
@@ -570,7 +575,7 @@ function VoraLib:CreateWindow(options)
 			ClipsDescendants = true
 		})
 
-		Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = NotifyFrame })
+		Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = NotifyFrame })
 		Create("UIStroke", { Color = Theme.Outline, Thickness = 1, Parent = NotifyFrame })
 
 		local ContentFrame = Create("Frame", {
@@ -588,7 +593,7 @@ function VoraLib:CreateWindow(options)
 			ImageColor3 = Theme.Accent
 		})
 		
-		Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = Icon })
+		Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = Icon })
 
 		local TitleLabel = Create("TextLabel", {
 			Parent = ContentFrame,
@@ -812,7 +817,7 @@ function VoraLib:CreateWindow(options)
 		ZIndex = 2005
 	})
 	
-	Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = DropdownSelect })
+	Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = DropdownSelect })
 	Create("UIStroke", { Color = Theme.Accent, Thickness = 1, Transparency = 0.5, Parent = DropdownSelect })
 	
 	-- Dropdown Shadow
@@ -883,7 +888,14 @@ function VoraLib:CreateWindow(options)
 		})
 		
 		Create("UICorner", {
-			CornerRadius = UDim.new(0, 6),
+			CornerRadius = UDim.new(0, 4),
+			Parent = TabButton
+		})
+		
+		Create("UIStroke", {
+			Color = Theme.Outline,
+			Transparency = 0.8,
+			Thickness = 1,
 			Parent = TabButton
 		})
 		
@@ -1080,7 +1092,7 @@ function VoraLib:CreateWindow(options)
 				Text = ""
 			})
 			
-			Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = SectionHeader })
+			Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = SectionHeader })
 			
             -- Header Gradient/Stroke (Optional beautification)
 			local HeaderStroke = Create("UIStroke", {
@@ -1242,7 +1254,7 @@ function VoraLib:CreateWindow(options)
             })
             
             Create("UICorner", {
-                CornerRadius = UDim.new(0, 6),
+                CornerRadius = UDim.new(0, 4),
                 Parent = ParagraphFrame
             })
             
@@ -1357,7 +1369,7 @@ function VoraLib:CreateWindow(options)
 			})
 			
 			Create("UICorner", {
-				CornerRadius = UDim.new(0, 6),
+				CornerRadius = UDim.new(0, 4),
 				Parent = ButtonFrame
 			})
 			
@@ -1487,7 +1499,7 @@ function VoraLib:CreateWindow(options)
             })
             
             Create("UICorner", {
-                CornerRadius = UDim.new(0, 6),
+                CornerRadius = UDim.new(0, 4),
                 Parent = ToggleFrame
             })
             
