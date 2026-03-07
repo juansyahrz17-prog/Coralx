@@ -1,7 +1,7 @@
 --[[
     Vorahub | COMMUNITY
     Author  : Andra/Garz
-    Version : 1.0.2
+    Version : 1.0.3
     Created : November 2025
     Discord : discord.gg/vorahub
 ]]
@@ -534,7 +534,8 @@ function VoraLib:CreateWindow(options)
 	local Window = {
 		Tabs = {},
 		Elements = {},
-		Instance = ScreenGui
+		Instance = ScreenGui,
+		Flags = {}
 	}
 
 
@@ -1614,6 +1615,9 @@ function VoraLib:CreateWindow(options)
             
 
 
+            local Flag = options.Flag or ToggleName
+            if Flag then Window.Flags[Flag] = ToggleObject end
+
             return ToggleObject
         end
 
@@ -1783,6 +1787,9 @@ function VoraLib:CreateWindow(options)
 			
 
 			
+			local Flag = options.Flag or SliderName
+			if Flag then Window.Flags[Flag] = SliderObject end
+
 			return SliderObject
 		end
 		
@@ -1920,6 +1927,9 @@ function VoraLib:CreateWindow(options)
             end
             
 
+
+            local Flag = options.Flag or InputName
+            if Flag then Window.Flags[Flag] = InputObject end
 
             return InputObject
         end
@@ -2147,6 +2157,9 @@ function VoraLib:CreateWindow(options)
             end
 
 
+
+            local Flag = options.Flag or DropdownName
+            if Flag then Window.Flags[Flag] = DropdownObject end
 
             return DropdownObject
         end
@@ -2404,6 +2417,9 @@ function VoraLib:CreateWindow(options)
 
 
 
+            local Flag = options.Flag or DropdownName
+            if Flag then Window.Flags[Flag] = MultiDropdownObject end
+
             return MultiDropdownObject
       end
 
@@ -2420,7 +2436,7 @@ function VoraLib:CreateWindow(options)
 			
 			local PickerFrame = Create("Frame", {
 				Name = "PickerFrame",
-				Parent = TabPage,
+				Parent = Tab.CurrentSectionContainer or TabPage,
 				BackgroundColor3 = Theme.ElementBackground,
 				BackgroundTransparency = 0.2,
 				BorderSizePixel = 0,
@@ -2615,6 +2631,24 @@ function VoraLib:CreateWindow(options)
 				Open = not Open
 				TweenService:Create(PickerFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Size = UDim2.new(1, 0, 0, Open and 200 or 38)}):Play()
 			end)
+
+            local ColorObject = { Value = Default }
+            function ColorObject:Set(val)
+                self.Value = val
+                ColorVal = val
+                local h,s,v = val:ToHSV()
+                ColorH, ColorS, ColorV = h, s, v
+                Preview.BackgroundColor3 = val
+				SVBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+				SVCursor.Position = UDim2.new(s, -3, 1 - v, -3)
+				HueCursor.Position = UDim2.new(h, -3, 0, -2)
+                Callback(val)
+            end
+            
+            local Flag = options.Flag or Name
+            if Flag then Window.Flags[Flag] = ColorObject end
+
+            return ColorObject
 		end
 
 		function Tab:CreateKeybind(options)
@@ -2625,7 +2659,7 @@ function VoraLib:CreateWindow(options)
 			
 			local KeybindFrame = Create("Frame", {
 				Name = "KeybindFrame",
-				Parent = TabPage,
+				Parent = Tab.CurrentSectionContainer or TabPage,
 				BackgroundColor3 = Theme.ElementBackground,
 				BackgroundTransparency = 0.2,
 				BorderSizePixel = 0,
@@ -2738,9 +2772,64 @@ function VoraLib:CreateWindow(options)
 					end
 				end
 			end))
+
+            local KeybindObject = { Value = Default }
+            function KeybindObject:Set(val)
+                self.Value = val
+                Default = val
+                KeybindButton.Text = val.Name
+                Callback(val)
+            end
+            
+            local Flag = options.Flag or KeybindName
+            if Flag then Window.Flags[Flag] = KeybindObject end
+
+            return KeybindObject
 		end
 
 		return Tab
+	end
+
+	function Window:SaveConfig(folderName, fileName)
+		local HttpService = game:GetService("HttpService")
+		local config = {}
+		for flag, obj in pairs(Window.Flags) do
+			local val = obj.Value
+			if typeof(val) == "Color3" then
+				val = {r = val.R, g = val.G, b = val.B, isColor = true}
+			elseif typeof(val) == "EnumItem" then
+				val = {name = val.Name, isKeybind = true}
+			end
+			config[flag] = val
+		end
+		
+		if not isfolder(folderName) then makefolder(folderName) end
+		writefile(folderName .. "/" .. fileName .. ".json", HttpService:JSONEncode(config))
+	end
+
+	function Window:LoadConfig(folderName, fileName)
+		local HttpService = game:GetService("HttpService")
+		local path = folderName .. "/" .. fileName .. ".json"
+		if isfile(path) then
+			local success, decoded = pcall(function()
+				return HttpService:JSONDecode(readfile(path))
+			end)
+			
+			if success and type(decoded) == "table" then
+				for flag, val in pairs(decoded) do
+					if Window.Flags[flag] then
+						if type(val) == "table" then
+							if val.isColor then
+								val = Color3.new(val.r, val.g, val.b)
+							elseif val.isKeybind then
+								val = Enum.KeyCode[val.name]
+							end
+						end
+						Window.Flags[flag]:Set(val)
+					end
+				end
+			end
+		end
 	end
 
 	function Window:Destroy()
