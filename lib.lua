@@ -2791,45 +2791,72 @@ function VoraLib:CreateWindow(options)
 	end
 
 	function Window:SaveConfig(folderName, fileName)
-		local HttpService = game:GetService("HttpService")
-		local config = {}
+		if not writefile then
+			return false, "writefile unavailable"
+		end
+
+		local configVersion = "1.0.3"
+		local config = { _version = configVersion }
 		for flag, obj in pairs(Window.Flags) do
 			local val = obj.Value
 			if typeof(val) == "Color3" then
-				val = {r = val.R, g = val.G, b = val.B, isColor = true}
+				val = { r = val.R, g = val.G, b = val.B, isColor = true }
 			elseif typeof(val) == "EnumItem" then
-				val = {name = val.Name, isKeybind = true}
+				val = { name = val.Name, isKeybind = true }
 			end
 			config[flag] = val
 		end
-		
-		if not isfolder(folderName) then makefolder(folderName) end
-		writefile(folderName .. "/" .. fileName .. ".json", HttpService:JSONEncode(config))
+
+		if isfolder and not isfolder(folderName) and makefolder then
+			makefolder(folderName)
+		end
+
+		local path = folderName .. "/" .. fileName .. ".json"
+		local success, err = pcall(function()
+			writefile(path, HttpService:JSONEncode(config))
+		end)
+		if not success then
+			return false, tostring(err)
+		end
+
+		return true
 	end
 
 	function Window:LoadConfig(folderName, fileName)
-		local HttpService = game:GetService("HttpService")
+		if not (isfile and readfile) then
+			return false, "readfile unavailable"
+		end
+
 		local path = folderName .. "/" .. fileName .. ".json"
-		if isfile(path) then
-			local success, decoded = pcall(function()
-				return HttpService:JSONDecode(readfile(path))
-			end)
-			
-			if success and type(decoded) == "table" then
-				for flag, val in pairs(decoded) do
-					if Window.Flags[flag] then
-						if type(val) == "table" then
-							if val.isColor then
-								val = Color3.new(val.r, val.g, val.b)
-							elseif val.isKeybind then
-								val = Enum.KeyCode[val.name]
-							end
-						end
-						Window.Flags[flag]:Set(val)
+		if not isfile(path) then
+			return false, "config not found"
+		end
+
+		local success, decoded = pcall(function()
+			return HttpService:JSONDecode(readfile(path))
+		end)
+		if not success or type(decoded) ~= "table" then
+			return false, "invalid config"
+		end
+
+		if decoded._version and decoded._version ~= "1.0.3" then
+			return false, "config version mismatch"
+		end
+
+		for flag, val in pairs(decoded) do
+			if flag ~= "_version" and Window.Flags[flag] then
+				if type(val) == "table" then
+					if val.isColor and val.r and val.g and val.b then
+						val = Color3.new(val.r, val.g, val.b)
+					elseif val.isKeybind and val.name then
+						val = Enum.KeyCode[val.name]
 					end
 				end
+				Window.Flags[flag]:Set(val)
 			end
 		end
+
+		return true
 	end
 
 	function Window:Destroy()
