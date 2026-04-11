@@ -16,6 +16,8 @@ Terrain = workspace:FindFirstChildOfClass("Terrain")
     
 local VoraLib = {}
 local Connections = {}
+-- Hanya satu slot keybind yang boleh "listening" sekaligus; mencegah key satu mengubah slot lain.
+local KeybindBindSessionCancel = nil
 
 
 function MakeDraggable(topbarobject, object)
@@ -2656,6 +2658,9 @@ function VoraLib:CreateWindow(options)
 			local KeybindName = options.Name or "Keybind"
 			local Default = options.Default or Enum.KeyCode.RightControl
 			local Callback = options.Callback or function() end
+			local function keybindLabel()
+				return (Default == Enum.KeyCode.Unknown) and "None" or Default.Name
+			end
 			
 			local KeybindFrame = Create("Frame", {
 				Name = "KeybindFrame",
@@ -2698,7 +2703,7 @@ function VoraLib:CreateWindow(options)
 				Position = UDim2.new(1, -95, 0.5, -12),
 				Size = UDim2.new(0, 85, 0, 24),
 				Font = Enum.Font.Gotham,
-				Text = Default.Name,
+				Text = keybindLabel(),
 				TextColor3 = Theme.TextSecondary,
 				TextSize = 13,
 				ClipsDescendants = true
@@ -2717,6 +2722,45 @@ function VoraLib:CreateWindow(options)
 			})
 			
 			local Binding = false
+
+			local function endBindSessionIfMine(cancelFn)
+				if KeybindBindSessionCancel == cancelFn then
+					KeybindBindSessionCancel = nil
+				end
+			end
+
+			local finishBindingCancel
+			finishBindingCancel = function()
+				if not Binding then
+					endBindSessionIfMine(finishBindingCancel)
+					return
+				end
+				Binding = false
+				KeybindButton.Text = keybindLabel()
+				TweenService:Create(KeybindButton, TweenInfo.new(0.2), {TextColor3 = Theme.TextSecondary}):Play()
+				endBindSessionIfMine(finishBindingCancel)
+			end
+
+			local KeybindObject = { Value = Default }
+			function KeybindObject:Set(val)
+				self.Value = val
+				Default = val
+				if val == Enum.KeyCode.Unknown then
+					KeybindButton.Text = "None"
+				else
+					KeybindButton.Text = val.Name
+				end
+			end
+
+			KeybindButton.MouseButton2Click:Connect(function()
+				if Binding and KeybindBindSessionCancel == finishBindingCancel then
+					finishBindingCancel()
+				end
+				Default = Enum.KeyCode.Unknown
+				KeybindObject.Value = Default
+				KeybindButton.Text = "None"
+				TweenService:Create(KeybindButton, TweenInfo.new(0.2), {TextColor3 = Theme.TextSecondary}):Play()
+			end)
 			
 			KeybindButton.MouseButton1Click:Connect(function()
 				
@@ -2748,6 +2792,10 @@ function VoraLib:CreateWindow(options)
 					Ripple:Destroy()
 				end)
 
+				if KeybindBindSessionCancel then
+					KeybindBindSessionCancel()
+				end
+				KeybindBindSessionCancel = finishBindingCancel
 				Binding = true
 				KeybindButton.Text = "..."
 				TweenService:Create(KeybindButton, TweenInfo.new(0.2), {TextColor3 = Theme.Accent}):Play()
@@ -2756,31 +2804,32 @@ function VoraLib:CreateWindow(options)
 			table.insert(Connections, UserInputService.InputBegan:Connect(function(Input)
 				if Binding then
 					if Input.UserInputType == Enum.UserInputType.Keyboard then
-						Default = Input.KeyCode
-						KeybindButton.Text = Default.Name
-						Binding = false
-						TweenService:Create(KeybindButton, TweenInfo.new(0.2), {TextColor3 = Theme.TextSecondary}):Play()
-						Callback(Default)
+						if Input.KeyCode == Enum.KeyCode.Escape or Input.KeyCode == Enum.KeyCode.Backspace then
+							Default = Enum.KeyCode.Unknown
+							KeybindObject.Value = Default
+							KeybindButton.Text = "None"
+							Binding = false
+							endBindSessionIfMine(finishBindingCancel)
+							TweenService:Create(KeybindButton, TweenInfo.new(0.2), {TextColor3 = Theme.TextSecondary}):Play()
+						else
+							Default = Input.KeyCode
+							KeybindObject.Value = Default
+							KeybindButton.Text = Default.Name
+							Binding = false
+							endBindSessionIfMine(finishBindingCancel)
+							TweenService:Create(KeybindButton, TweenInfo.new(0.2), {TextColor3 = Theme.TextSecondary}):Play()
+							Callback(Default)
+						end
 					elseif Input.UserInputType == Enum.UserInputType.MouseButton1 then
-						Binding = false
-						KeybindButton.Text = Default.Name
-						TweenService:Create(KeybindButton, TweenInfo.new(0.2), {TextColor3 = Theme.TextSecondary}):Play()
+						finishBindingCancel()
 					end
 				else
-					if Input.KeyCode == Default then
+					if Default ~= Enum.KeyCode.Unknown and Input.KeyCode == Default then
 						Callback(Default)
 					end
 				end
 			end))
 
-            local KeybindObject = { Value = Default }
-            function KeybindObject:Set(val)
-                self.Value = val
-                Default = val
-                KeybindButton.Text = val.Name
-                Callback(val)
-            end
-            
             local Flag = options.Flag or KeybindName
             if Flag then Window.Flags[Flag] = KeybindObject end
 
